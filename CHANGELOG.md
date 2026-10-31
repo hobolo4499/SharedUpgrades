@@ -3,6 +3,8 @@
 ## Unreleased
 - Added: upgrades from other mods that use REPOLib (for example extra upgrade mods) are now
   shared with the whole team as well. REPOLib is not required.
+- Fixed: when another mod gives an upgrade to every player at once, players no longer
+  get it once per player.
 
 ## 1.1.1
 - Changed: the mod now uses the SolEclips name everywhere, matching its Thunderstore page.

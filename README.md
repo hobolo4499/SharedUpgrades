@@ -23,5 +23,7 @@ map player count, death head battery), every player in the game receives it too.
 - Upgrades added by other mods through **REPOLib** are shared too (REPOLib is optional).
   For those, any level a player gains counts, including from debug commands or other mods.
   Mod upgrades that don't use REPOLib are not shared.
+- If another mod already gives a level to every player at once, it still counts as one
+  upgrade, so nobody gets it several times.
 - Don't combine this with another upgrade-sharing mod (such as CrewUpgrades), or players
   get upgrades twice.

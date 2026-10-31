@@ -19,6 +19,8 @@ internal static class UpgradeLedger
     // would apply the upgrade twice, so wait until a player has been around for a while.
     private const float SpawnGraceSeconds = 3f;
     private const float CheckIntervalSeconds = 1f;
+    // Levels other players gain this soon after a team increase are treated as part of it.
+    private const float SameUpgradeSeconds = 1f;
 
     // Every PunManager.UpgradeXxx(string _steamID, int value) method, keyed by name.
     internal static readonly Dictionary<string, MethodInfo> UpgradeMethods = typeof(PunManager)
@@ -33,8 +35,9 @@ internal static class UpgradeLedger
     internal static bool Granting { get; private set; }
 
     private static readonly Dictionary<PlayerAvatar, float> _firstSeen = new();
+    // upgrade method name -> Time.time the team total last went up
+    private static readonly Dictionary<string, float> _lastIncrease = new();
     private static float _nextCheck;
-    private static bool _dirty;
 
     internal static void Register(StatsManager stats)
     {
@@ -51,12 +54,33 @@ internal static class UpgradeLedger
             return;
         }
 
-        team[upgrade] = team.GetValueOrDefault(upgrade, 0) + value;
         string key = GrantedKeyFor(steamID, upgrade);
-        granted[key] = granted.GetValueOrDefault(key, 0) + value;
-        _dirty = true;
+        int total = team.GetValueOrDefault(upgrade, 0);
+        int had = granted.GetValueOrDefault(key, 0);
 
-        SharedUpgrades.Logger.LogInfo($"{steamID} used {upgrade}; team total is now {team[upgrade]}");
+        // Another mod may give a level to every player at once, possibly on each player's own
+        // client, so those levels reach the host one by one. Right after the team total went up
+        // (nothing is handed out yet, see Reconcile), a level for a player who is still owed it
+        // is the same upgrade, not a new one.
+        int owed = 0;
+        if (Time.time - _lastIncrease.GetValueOrDefault(upgrade, float.NegativeInfinity) < SameUpgradeSeconds)
+        {
+            owed = Mathf.Clamp(total - had, 0, value);
+        }
+
+        granted[key] = had + value;
+        if (owed > 0)
+        {
+            SharedUpgrades.Logger.LogInfo($"{steamID} got {owed}x {upgrade} at the same time as the team; not counted again");
+        }
+        if (value > owed)
+        {
+            team[upgrade] = total + value - owed;
+            _lastIncrease[upgrade] = Time.time;
+            // Hand it out as soon as it has settled.
+            _nextCheck = Mathf.Min(_nextCheck, Time.time + SameUpgradeSeconds);
+            SharedUpgrades.Logger.LogInfo($"{steamID} used {upgrade}; team total is now {team[upgrade]}");
+        }
     }
 
     // Host only, every frame: hand out whatever each player is missing.
@@ -68,12 +92,11 @@ internal static class UpgradeLedger
             return;
         }
 
-        if (!_dirty && Time.time < _nextCheck)
+        if (Time.time < _nextCheck)
         {
             return;
         }
         _nextCheck = Time.time + CheckIntervalSeconds;
-        _dirty = false;
 
         Reconcile();
     }
@@ -114,6 +137,12 @@ internal static class UpgradeLedger
 
             foreach (KeyValuePair<string, int> entry in team.ToList())
             {
+                // Still collecting levels another mod may be giving everyone (RecordActivation).
+                if (Time.time - _lastIncrease.GetValueOrDefault(entry.Key, float.NegativeInfinity) < SameUpgradeSeconds)
+                {
+                    continue;
+                }
+
                 string key = GrantedKeyFor(steamID, entry.Key);
                 int missing = entry.Value - granted.GetValueOrDefault(key, 0);
                 // An upgrade from a mod that isn't installed now stays in the ledger for later.
