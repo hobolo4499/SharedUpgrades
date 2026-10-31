@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SharedUpgrades;
 
-[BepInPlugin("Eclips.SharedUpgrades", "SharedUpgrades", "1.1.0")]
+[BepInPlugin("SolEclips.SharedUpgrades", "SharedUpgrades", "1.1.1")]
 public class SharedUpgrades : BaseUnityPlugin
 {
     internal static SharedUpgrades Instance { get; private set; } = null!;

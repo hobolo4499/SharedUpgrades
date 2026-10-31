@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+- Changed: the mod now uses the SolEclips name everywhere, matching its Thunderstore page.
+- Added: a Website link on the Thunderstore page to the source code on GitHub, where you
+  can also report bugs.
+
 ## 1.1.0
 - Changed: the host now keeps track of every upgrade used and hands them out to all players.
 - Added: players who join later, or who missed a level, get every upgrade they missed.
