@@ -5,6 +5,8 @@
   shared with the whole team as well. REPOLib is not required.
 - Fixed: when another mod gives an upgrade to every player at once, players no longer
   get it once per player.
+- Changed: shared upgrades now reach the other players after a short delay (about 1 second),
+  so a level another mod already gave everyone isn't handed out twice.
 
 ## 1.1.1
 - Changed: the mod now uses the SolEclips name everywhere, matching its Thunderstore page.
