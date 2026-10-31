@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SharedUpgrades;
 
-[BepInPlugin("SolEclips.SharedUpgrades", "SharedUpgrades", "1.1.1")]
+[BepInPlugin("SolEclips.SharedUpgrades", "SharedUpgrades", "1.2.0")]
 [BepInDependency("REPOLib", BepInDependency.DependencyFlags.SoftDependency)] // load after it, if present
 public class SharedUpgrades : BaseUnityPlugin
 {

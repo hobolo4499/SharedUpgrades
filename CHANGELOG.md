@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 - Added: upgrades from other mods that use REPOLib (for example extra upgrade mods) are now
   shared with the whole team as well. REPOLib is not required.
 - Fixed: when another mod gives an upgrade to every player at once, players no longer
