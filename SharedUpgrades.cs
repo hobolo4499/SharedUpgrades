@@ -6,6 +6,7 @@ using UnityEngine;
 namespace SharedUpgrades;
 
 [BepInPlugin("SolEclips.SharedUpgrades", "SharedUpgrades", "1.1.1")]
+[BepInDependency("REPOLib", BepInDependency.DependencyFlags.SoftDependency)] // load after it, if present
 public class SharedUpgrades : BaseUnityPlugin
 {
     internal static SharedUpgrades Instance { get; private set; } = null!;
@@ -31,6 +32,7 @@ public class SharedUpgrades : BaseUnityPlugin
     {
         Harmony ??= new Harmony(Info.Metadata.GUID);
         Harmony.PatchAll();
+        RepoLibUpgrades.Init(Harmony);
     }
 
     internal void Unpatch()

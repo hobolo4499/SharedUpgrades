@@ -20,4 +20,8 @@ map player count, death head battery), every player in the game receives it too.
 ## Notes
 - Only upgrades applied by using an upgrade item are shared. Upgrades a player had before
   installing the mod stay personal.
-- Upgrades added by other mods (for example through REPOLib) are not shared.
+- Upgrades added by other mods through **REPOLib** are shared too (REPOLib is optional).
+  For those, any level a player gains counts, including from debug commands or other mods.
+  Mod upgrades that don't use REPOLib are not shared.
+- Don't combine this with another upgrade-sharing mod (such as CrewUpgrades), or players
+  get upgrades twice.

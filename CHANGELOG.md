@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Added: upgrades from other mods that use REPOLib (for example extra upgrade mods) are now
+  shared with the whole team as well. REPOLib is not required.
+
 ## 1.1.1
 - Changed: the mod now uses the SolEclips name everywhere, matching its Thunderstore page.
 - Added: a Website link on the Thunderstore page to the source code on GitHub, where you

@@ -116,32 +116,47 @@ internal static class UpgradeLedger
             {
                 string key = GrantedKeyFor(steamID, entry.Key);
                 int missing = entry.Value - granted.GetValueOrDefault(key, 0);
-                if (missing <= 0)
+                // An upgrade from a mod that isn't installed now stays in the ledger for later.
+                if (missing <= 0 || !CanApply(entry.Key))
                 {
                     continue;
                 }
 
                 granted[key] = entry.Value;
                 Apply(steamID, entry.Key, missing);
-                UpgradeNetwork.SendGrant(steamID, entry.Key, missing);
+                if (!RepoLibUpgrades.IsRepoLibKey(entry.Key))
+                {
+                    UpgradeNetwork.SendGrant(steamID, entry.Key, missing);
+                }
                 SharedUpgrades.Logger.LogInfo($"Granted {missing}x {entry.Key} to {steamID}");
             }
         }
     }
 
-    // Runs on the host directly and on clients when the host's grant event arrives.
+    private static bool CanApply(string upgrade)
+    {
+        return UpgradeMethods.ContainsKey(upgrade) || RepoLibUpgrades.CanApply(upgrade);
+    }
+
+    // Runs on the host directly and, for vanilla upgrades, on clients when the host's grant
+    // event arrives. REPOLib upgrades are only applied on the host; REPOLib syncs them.
     internal static void Apply(string steamID, string upgrade, int amount)
     {
-        if (!UpgradeMethods.TryGetValue(upgrade, out MethodInfo method) || !PunManager.instance)
-        {
-            SharedUpgrades.Logger.LogWarning($"Can't apply unknown upgrade {upgrade}");
-            return;
-        }
-
         Granting = true;
         try
         {
-            method.Invoke(PunManager.instance, new object[] { steamID, amount });
+            if (RepoLibUpgrades.IsRepoLibKey(upgrade))
+            {
+                RepoLibUpgrades.AddLevel(steamID, upgrade, amount);
+            }
+            else if (UpgradeMethods.TryGetValue(upgrade, out MethodInfo method) && PunManager.instance)
+            {
+                method.Invoke(PunManager.instance, new object[] { steamID, amount });
+            }
+            else
+            {
+                SharedUpgrades.Logger.LogWarning($"Can't apply unknown upgrade {upgrade}");
+            }
         }
         finally
         {
